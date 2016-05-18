@@ -25,7 +25,7 @@ int path_planning_upload_map(
     ) {
     namespace pt = boost::property_tree;
     
-    std::string base_path = "~/";
+    std::string base_path = "~/maps/";
     base_path += user_name + "/" + map_name + ".";
     
     upload_file(base_path+"png", png_name, host, port, debug);

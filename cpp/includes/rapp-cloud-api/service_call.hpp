@@ -15,6 +15,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include "json_parser.hpp"
 
+#include "utils.hpp"
+
 namespace rapp {
 namespace cloud {
 
@@ -22,25 +24,30 @@ namespace pt = boost::property_tree;
 
 using boost::asio::ip::tcp;
 
-struct s
-{
-    typedef std::string internal_type;
-    typedef std::string external_type;
-
-    boost::optional<std::string> get_value(const std::string &v) { return  v.substr(1, v.size() - 2) ; }
-    boost::optional<std::string> put_value(const std::string &v) { return std::string("\"") + v + std::string("\""); }
-};
-
-
 std::string base64_encode(const std::vector<char> & data) {
     const std::string base64_padding[] = {"", "==","="};
-  
+
     using namespace boost::archive::iterators;
     typedef std::vector<char>::const_iterator iterator_type;
     typedef base64_from_binary<transform_width<iterator_type, 6, 8> > base64_enc;
     std::stringstream ss;
     std::copy(base64_enc(data.begin()), base64_enc(data.end()), std::ostream_iterator<char>(ss));
     ss << base64_padding[data.size() % 3];
+    return ss.str();
+}
+
+std::string base64_encode(std::istream & data) {
+    const std::string base64_padding[] = {"", "==","="};
+  
+    using namespace boost::archive::iterators;
+    typedef std::istream_iterator<char> iterator_type;
+    typedef base64_from_binary<transform_width<iterator_type, 6, 8> > base64_enc;
+    std::stringstream ss;
+    data.seekg(0, std::ios_base::end);
+    std::streampos fileSize = data.tellg();
+    data.seekg(0, std::ios_base::beg);
+    std::copy(base64_enc(iterator_type(data)), base64_enc(iterator_type()), std::ostream_iterator<char>(ss));
+    ss << base64_padding[fileSize % 3];
     return ss.str();
 }
 

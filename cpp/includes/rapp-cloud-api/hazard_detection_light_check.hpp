@@ -1,5 +1,5 @@
-#ifndef RAPP_CLOUD_HAZARD_DETECTION_DOOR_CHECK
-#define RAPP_CLOUD_HAZARD_DETECTION_DOOR_CHECK
+#ifndef RAPP_CLOUD_HAZARD_DETECTION_LIGHT_CHECK
+#define RAPP_CLOUD_HAZARD_DETECTION_LIGHT_CHECK
 
 #include <string>
 
@@ -14,23 +14,23 @@
 namespace rapp {
 namespace cloud {
 
-int hazard_detection_door_check(rapp::object::picture::Ptr pic) {
+int hazard_detection_light_check(rapp::object::picture::Ptr pic) {
     namespace pt = boost::property_tree;
 
-    std::string name = upload_file(std::string("door.") + pic->type(), pic);
+    std::string name = upload_file(std::string("light.") + pic->type(), pic);
     
     pt::ptree args;
     args.add_child("header", create_header("frame_id"));
     args.put("imageFilename", name, s());
     
-    pt::ptree res = rapp::cloud::service_call("/rapp/rapp_hazard_detection/door_check", args);
+    pt::ptree res = rapp::cloud::service_call("/rapp/rapp_hazard_detection/light_check", args);
     if (res.empty())
         return -1;
     else    
-        return res.get<int>("door_angle");
+        return res.get<int>("light_level");
 }
 
 } // namespace cloud
 } // namespace rapp
 
-#endif /* RAPP_CLOUD_HAZARD_DETECTION_DOOR_CHECK */
+#endif /* RAPP_CLOUD_HAZARD_DETECTION_LIGHT_CHECK */

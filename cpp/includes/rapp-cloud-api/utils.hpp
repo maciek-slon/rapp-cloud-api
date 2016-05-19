@@ -100,6 +100,50 @@ pt::ptree dump(const ro::pose_stamped & p) {
     return tree;
 }
 
+template<typename T>
+T extract(const pt::ptree & tree) {
+    T ret;
+    return ret;
+}
+
+template<>
+ro::pose extract<ro::pose>(const pt::ptree & tree) {
+    ro::pose ret;
+    
+    ret.position.x = tree.get<float>("position.x");
+    ret.position.y = tree.get<float>("position.y");
+    ret.position.z = tree.get<float>("position.z");
+    
+    ret.orientation.x = tree.get<float>("orientation.x");
+    ret.orientation.y = tree.get<float>("orientation.y");
+    ret.orientation.z = tree.get<float>("orientation.z");
+    ret.orientation.w = tree.get<float>("orientation.w");
+        
+    return ret;
+}
+
+template<>
+ro::header extract<ro::header>(const pt::ptree & tree) {
+    ro::header ret;
+    
+    ret.seq = tree.get<int>("seq");
+    ret.frame_id = tree.get<std::string>("frame_id");
+    ret.stamp.sec = tree.get<long>("stamp.secs");
+    ret.stamp.nsec = tree.get<long>("stamp.nsecs");
+    
+    return ret;
+}
+
+template<>
+ro::pose_stamped extract<ro::pose_stamped>(const pt::ptree & tree) {
+    ro::pose_stamped ret;
+    
+    ret.header = extract<ro::header>(tree.get_child("header"));
+    ret.pose = extract<ro::pose>(tree.get_child("pose"));
+    
+    return ret;
+}
+
 
 } // namespace cloud
 } // namespace rapp

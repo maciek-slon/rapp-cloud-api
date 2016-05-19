@@ -16,7 +16,7 @@ namespace cloud {
     
 namespace ro = rapp::object;
 
-std::string path_planning_plan(
+std::vector<ro::pose_stamped> path_planning_plan(
         const std::string & user,
         const std::string & map,
         const std::string & robot,
@@ -39,9 +39,15 @@ std::string path_planning_plan(
     
     pt::ptree res = rapp::cloud::service_call("/rapp/rapp_path_planning/planPath2d", args, host, port, debug);
     if (res.empty())
-        return "dupa";
-    else    
-        return res.get<std::string>("error");
+        throw std::runtime_error("Error calling path_planning_plan service");
+    
+    std::vector<ro::pose_stamped> path;
+    
+    for (auto ul : res.get_child("path")) {
+        path.push_back(extract<ro::pose_stamped>(ul.second.get_child("")));
+    }
+    
+    return path;
 }
 
 } // namespace cloud

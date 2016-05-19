@@ -60,9 +60,16 @@ pt::ptree service_call(const std::string & name, const pt::ptree & args, const s
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
     tcp::socket socket(io_service);
+    
+    
     boost::asio::connect(socket, endpoint_iterator);
+    //socket.set_option( boost::asio::ip::tcp::no_delay( true ) );
+    //socket.set_option( boost::asio::socket_base::send_buffer_size( 1024000 ) );
+    //socket.set_option( boost::asio::socket_base::receive_buffer_size( 1024000 ) );
 
-    boost::array<char, 10240> buf;
+
+
+    boost::array<char, 1024000> buf;
     boost::system::error_code error;
 
     pt::ptree tree;
@@ -76,34 +83,57 @@ pt::ptree service_call(const std::string & name, const pt::ptree & args, const s
     if (debug) {        
         std::cout << "Full json: " << ss.str() << std::endl;
     }
-            
+        
     boost::system::error_code ignored_error;
     boost::asio::write(socket, boost::asio::buffer(ss.str()), boost::asio::transfer_all(), ignored_error);
 
-    size_t len = socket.read_some(boost::asio::buffer(buf), error);
-
-    if (error == boost::asio::error::eof)
-        std::cout << "EOF\n";
-    else if (error)
-        throw boost::system::system_error(error); // Some other error.
-
-    if (debug) {
-        std::cout.write(buf.data(), len);
-        std::cout << std::endl;
-    }
-    
     pt::ptree tree_out;
-    std::istringstream is(std::string(buf.begin(), buf.begin()+len));
-    pt::read_json(is, tree_out);
-    pt::ptree res;
+    bool success = false;
+
+    std::string json_reply;
+    std::string jtmp;
+
+    do {
+        size_t len;
+        
+        std::cout << "Reading...\n";
+        len = socket.read_some(boost::asio::buffer(buf), error);
+        if (error == boost::asio::error::eof) {
+            std::cout << "EOF\n";
+            break;
+        }
+        else if (error)
+            throw boost::system::system_error(error); // Some other error.
+
+        if (debug) {
+            std::cout << "Returned: " << len << " bytes =================================\n";
+            std::cout.write(buf.data(), len);
+            std::cout << std::endl;
+        }
+        
+        try {
+            json_reply += std::string(buf.begin(), buf.begin()+len);
+            if (json_reply.back() == '}') {
+                jtmp = json_reply;
+                std::istringstream is(jtmp);
+                pt::read_json(is, tree_out);
+                success = true;
+            }
+        }
+        catch (std::exception & e) {
+            if (debug) std::cout << e.what() << "\n";
+        }
+        
+    } while(!success);
     
+    pt::ptree res;
     if (tree_out.get<bool>("result")) {
         
         res = tree_out.get_child("values");
         if (debug) {
             std::stringstream ss;
             pt::write_json(ss, res);
-            std::cout << "Result json: " << ss.str() << std::endl;
+            //std::cout << "Result json: " << ss.str() << std::endl;
         }
         
     } else {

@@ -96,7 +96,6 @@ pt::ptree service_call(const std::string & name, const pt::ptree & args, const s
     do {
         size_t len;
         
-        std::cout << "Reading...\n";
         len = socket.read_some(boost::asio::buffer(buf), error);
         if (error == boost::asio::error::eof) {
             std::cout << "EOF\n";

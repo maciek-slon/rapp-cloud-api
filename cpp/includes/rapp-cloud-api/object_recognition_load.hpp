@@ -30,7 +30,7 @@ string[] names
 int32 result
 */
 
-std::vector<std::string> object_recognition_load(
+bool object_recognition_load(
         const std::string & user,
         const std::vector<std::string> & names,
         const std::string & host = "localhost",
@@ -45,9 +45,9 @@ std::vector<std::string> object_recognition_load(
     
     pt::ptree res = rapp::cloud::service_call("/rapp/rapp_object_recognition/load_models", args, host, port, debug);
     if (res.empty())
-        return {};
+        return false;
     
-    return {};
+    return true;
 }
 
 } // namespace cloud

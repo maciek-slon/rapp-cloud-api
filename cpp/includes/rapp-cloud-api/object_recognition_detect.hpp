@@ -43,8 +43,6 @@ int32 result
 std::vector<ro::object> object_recognition_detect(
         const std::string & user,
         rapp::object::picture::Ptr pic,
-        const std::vector<std::string> & names,
-        const std::vector<std::string> & models,
         int limit,
         const std::string & host = "localhost",
         const std::string & port = "9090",
@@ -54,16 +52,17 @@ std::vector<ro::object> object_recognition_detect(
 
     std::string name = upload_file(std::string("object.") + pic->type(), pic, host, port, false);
     
-    std::vector<std::string> model_files;
+    /*std::vector<std::string> model_files;
     for (const auto & m : models) {
         model_files.push_back(upload_file("model", m, host, port, false));
-    }
+    }*/
     
+    std::vector<std::string> empty;
     pt::ptree args;
     args.put("user", user, s());
     args.put("fname", name, s());
-    args.add_child("names", dump(names));
-    args.add_child("files", dump(model_files));
+    args.add_child("names", dump(empty));
+    args.add_child("files", dump(empty));
     args.put("limit", limit);
     
     pt::ptree res = rapp::cloud::service_call("/rapp/rapp_object_recognition/find_objects", args, host, port, debug);

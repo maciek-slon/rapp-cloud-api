@@ -137,7 +137,7 @@ pt::ptree service_call(const std::string & name, const pt::ptree & args, const s
         }
         
     } else {
-        std::cout << tree_out.get<std::string>("values") << std::endl;
+        //std::cout << tree_out.get<std::string>("values") << std::endl;
     }
     
     return res;

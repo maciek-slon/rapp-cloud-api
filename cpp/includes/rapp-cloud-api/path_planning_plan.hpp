@@ -1,5 +1,5 @@
-#ifndef RAPP_CLOUD_SPEECH_DETECTION_SPHINX4
-#define RAPP_CLOUD_SPEECH_DETECTION_SPHINX4
+#ifndef RAPP_CLOUD_PATH_PLANNING_PLAN
+#define RAPP_CLOUD_PATH_PLANNING_PLAN
 
 #include <string>
 
@@ -53,4 +53,4 @@ std::vector<ro::pose_stamped> path_planning_plan(
 } // namespace cloud
 } // namespace rapp
 
-#endif /* RAPP_CLOUD_SPEECH_DETECTION_SPHINX4 */
+#endif /* RAPP_CLOUD_PATH_PLANNING_PLAN */

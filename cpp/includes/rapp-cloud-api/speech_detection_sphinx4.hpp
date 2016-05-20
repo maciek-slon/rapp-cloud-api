@@ -19,7 +19,7 @@ namespace cloud {
     
 namespace ro = rapp::object;
 
-std::string speech_detection_sphinx4(
+std::vector<std::string> speech_detection_sphinx4(
         const std::string & fname,
         const std::string & language,
         const std::vector<std::string> & words,
@@ -46,9 +46,13 @@ std::string speech_detection_sphinx4(
     
     pt::ptree res = rapp::cloud::service_call("/rapp/rapp_speech_detection_sphinx4/batch_speech_to_text", args, host, port, debug);
     if (res.empty())
-        return "dupa";
-    else    
-        return res.get<std::string>("error");
+        return {};
+    
+    std::vector<std::string> ret;
+    for (auto ul : res.get_child("words")) {
+        ret.push_back(ul.second.get_child("").get_value<std::string>());
+    }
+    return ret;
 }
 
 } // namespace cloud

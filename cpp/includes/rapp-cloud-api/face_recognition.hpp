@@ -67,10 +67,10 @@ std::vector<int> face_recognition (
     namespace pt = boost::property_tree;
     ro::header header(0, ro::time(0, 0), "frame_id");
 
-    std::string name = upload_file(std::string("face.") + pic->type(), pic, host, port, debug);
+    std::string name = upload_file(std::string("face.") + pic->type(), pic, host, port, false);
     
     pt::ptree args;
-    args.put("user", user);
+    args.put("user", user, s());
     args.add_child("header", dump(header));
     args.put("imageFilename", name, s());
     args.put("learn", false);
@@ -84,27 +84,31 @@ std::vector<int> face_recognition (
         ps.add_child("header", dump(header));
         ps.add_child("point", dump(ro::point(f.ux(), f.uy(), 0)));
 
-//        pt::ptree elem;
-//        elem.add_child("", ps);
         ul.push_back(std::make_pair("", ps));
 
         pt::ptree ps2;
         ps2.add_child("header", dump(header));
         ps2.add_child("point", dump(ro::point(f.dx(), f.dy(), 0)));
 
-//        pt::ptree elem2;
-//        elem2.add_child("", ps2);
         dr.push_back(std::make_pair("", ps2));
     }
-
-    args.add_child("faces_up_left", ul);
-    args.add_child("faces_down_right", dr);
+    if (faces.empty()) {
+        args.put("faces_up_left", "[]");
+        args.put("faces_down_right", "[]");
+    } else {
+        args.add_child("faces_up_left", ul);
+        args.add_child("faces_down_right", dr);
+    }
     
     pt::ptree res = rapp::cloud::service_call("/rapp/rapp_face_recognition/recognize_faces", args, host, port, debug);
     if (res.empty())
         return {};
 
     std::vector<int> ids;
+    
+    for (auto ul : res.get_child("recognizedIDs")) {
+        ids.push_back(ul.second.get_child("").get_value<int>());
+    }
     
     return ids;
 }
